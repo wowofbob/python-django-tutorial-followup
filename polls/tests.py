@@ -16,6 +16,44 @@ def create_question(question_text, days):
         pub_date=time
     )
 
+class QuestionDetailViewTests(TestCase):
+    def test_future_question(self):
+        """
+            404 on future question
+        """
+        future_question = create_question(
+            question_text="future",
+            days=30
+        )
+        response = self.client.get(
+            reverse(
+                'polls:detail',
+                args=(future_question.id,)
+            )
+        )
+        self.assertEqual(
+            response.status_code, 404
+        )
+    def test_past_question(self):
+        """
+            show past questions
+        """
+        past_question = create_question(
+            question_text="past", days=-30
+        )
+        response = self.client.get(
+            reverse(
+                'polls:detail',
+                args=(past_question.id,)
+            )
+        )
+        self.assertEqual(
+            response.status_code, 200
+        )
+        self.assertContains(
+            response, past_question.question_text
+        )
+
 class QuestionIndexViewTests(TestCase):
     def test_no_questions(self):
         """
